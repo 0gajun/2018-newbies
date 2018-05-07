@@ -4,6 +4,7 @@ source 'https://rubygems.org'
 
 gem 'rails', '~> 5.2.0'
 
+gem 'devise'
 gem 'bootsnap', require: false
 
 gem 'jbuilder', '~> 2.5'
