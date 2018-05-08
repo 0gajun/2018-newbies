@@ -22,4 +22,45 @@ RSpec.describe RemitRequest, type: :model do
       end
     end
   end
+
+  statuses = %i[accepted rejected canceled]
+  statuses.combination(2).each do |status1, status2|
+    context "with both #{status1} and #{status2}" do
+      subject(:remit_request) { build_stubbed(:remit_request, status1, "#{status2}_at": Time.current) }
+      it { is_expected.not_to be_valid }
+    end
+  end
+
+  describe "amount validation" do
+    context "with negative amount" do
+      subject(:remit_request) { build_stubbed(:remit_request, amount: -1) }
+
+      it { is_expected.not_to be_valid }
+    end
+  end
+
+  describe "user_id validation" do
+    context "with nil" do
+      subject(:remit_request) { build_stubbed(:remit_request, user_id: nil) }
+
+      it { is_expected.not_to be_valid }
+    end
+  end
+
+  describe "target_id validation" do
+    context "with nil" do
+      subject(:remit_request) { build_stubbed(:remit_request, target_id: nil) }
+
+      it { is_expected.not_to be_valid }
+    end
+  end
+
+  describe "user_id and target_id validation" do
+    context "when user_id and target_id are same" do
+      let (:user) { create(:user) }
+      subject(:remit_request) { build_stubbed(:remit_request, user_id: user.id, target_id: user.id) }
+
+      it { is_expected.not_to be_valid }
+    end
+  end
 end
