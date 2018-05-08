@@ -2,8 +2,8 @@
 
 FactoryBot.define do
   factory :remit_request do
-    user { build(:user) }
-    target { build(:user) }
+    association :user, factory: :user
+    association :target, factory: :user
     amount 100
 
     trait :outstanding do
