@@ -4,7 +4,13 @@ class RemitRequest < ApplicationRecord
   belongs_to :user
   belongs_to :target, class_name: 'User'
 
-  validates :amount, numericality: { greater_then: 0 }
+  validates :user_id, presence: true
+  validates :target_id, presence: true
+  validates :amount, numericality: { greater_than: 0 }
+
+  validate :user_id_and_target_id_should_not_be_same
+  validate :multiple_statuses_should_not_exist
+
 
   scope :outstanding, ->(at = Time.current) { not_accepted(at).not_rejected(at).not_canceled(at) }
   scope :accepted, ->(at = Time.current) { where(RemitRequest.arel_table[:accepted_at].lteq(at)) }
@@ -29,4 +35,20 @@ class RemitRequest < ApplicationRecord
   def canceled?(at = Time.current)
     canceled_at && canceled_at <= at
   end
+
+  private
+    def multiple_statuses_should_not_exist
+      if [accepted_at?, rejected_at?, canceled_at?].count(true) > 1
+        errors.add(:accepted_at?, "RemitRequest cannot have multiple statuses")
+        errors.add(:rejected_at?, "RemitRequest cannot have multiple statuses")
+        errors.add(:canceled_at?, "RemitRequest cannot have multiple statuses")
+      end
+    end
+
+    def user_id_and_target_id_should_not_be_same
+      if user_id == target_id
+        errors.add(:user_id, "User id and target id shouldn't be same")
+        errors.add(:target_id, "User id and target id shouldn't be same")
+      end
+    end
 end
