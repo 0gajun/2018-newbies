@@ -47,4 +47,9 @@ class RemitRequest < ApplicationRecord
 
     errors.add(:requested_user, 'Cannot request a remit to yourself')
   end
+
+  def publish_requested_event
+    msg = self.to_json(only: [:id, :user_id, :requested_user_id, :amount])
+    Redis.current.publish("user.#{requested_user.id}.received_remit_request", msg)
+  end
 end
