@@ -1,31 +1,38 @@
 class ChargeJob < ApplicationJob
   queue_as :default
 
-  around_perform do |job, block|
-    # 実行前に行なう作業
-    block.call
-    # 実行後に行なう作業
-    # DBへのトランザクション処理がここに入る？
-  end
-
   def perform(charge)
-    #charge objectを受ける方が良いかも
-    @capture_response = Stripe::Charge.retrieve(charge.stripe_id).capture
-    Rails.logger.info('[DEBUG] got response')
-  rescue Stripe::StripeError => e
+    capture_response = Stripe::Charge.retrieve(charge.stripe_id).capture
+    execute!(charge, 'charged')
+  rescue Stripe::CardError => e
+    # Since it's a decline, Stripe::CardError will be caught
+    #charge_historyのresultをerrorにする
+    execute!(charge, 'faild')
+  rescue => e
     errors.add(:user, e.code.to_s.to_sym)
     throw :abort
   end
 
-  def execute!(charge) 
+  def execute!(charge, result) 
     ActiveRecord::Base.transaction do
-      user_balance = charge.user.balance
+     if charge.present?
+       user_balance = charge.user.balance
+     else
+       return
+     end
 
       aquire_lock!(user_balance)
 
       increase_balance!(user_balance, charge.amount)
 
       release_lock!(user_balance)
+
+      #add charge_history into charge_history table
+      ChargeHistory.create!(amount: charge.amount, stripe_id: charge.stripe_id, result: result, user_id: charge.user_id)
+
+      #delete charge clomun 
+      charge.destroy!
+      
     end
   end
 
