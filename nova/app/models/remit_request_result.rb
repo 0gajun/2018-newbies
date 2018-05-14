@@ -4,15 +4,15 @@ class RemitRequestResult < ApplicationRecord
   RESULT_ACCEPTED = 'accepted'
   RESULT_REJECTED = 'rejected'
   RESULT_CANCELED = 'canceled'
-  MIN_REMIT_AMOUNT = 1 # TODO: RemitRequestと共通化
-  MAX_REMIT_AMOUNT = 99_999_999 # TODO: RemitRequestと共通化
 
   belongs_to :user
   belongs_to :requested_user, class_name: 'User'
 
+  validates :user_id, presence: true
+  validates :requested_user_id, presence: true
   validates :amount, presence: true, numericality: { only_integer: true,
-                                                     greater_than_or_equal_to: MIN_REMIT_AMOUNT,
-                                                     less_than_or_equal_to: MAX_REMIT_AMOUNT, }
+                                                     greater_than_or_equal_to: Constants::MIN_REMIT_AMOUNT,
+                                                     less_than_or_equal_to: Constants::MAX_REMIT_AMOUNT, }
   validates :result, presence: true,
                      inclusion: { in: [RESULT_ACCEPTED, RESULT_REJECTED, RESULT_CANCELED] }
 
