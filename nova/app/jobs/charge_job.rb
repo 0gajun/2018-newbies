@@ -6,7 +6,6 @@ class ChargeJob < ApplicationJob
     execute!(charge, 'charged')
   rescue Stripe::CardError => e
     # Since it's a decline, Stripe::CardError will be caught
-    #charge_historyのresultをerrorにする
     execute!(charge, 'faild')
   rescue => e
     errors.add(:user, e.code.to_s.to_sym)
@@ -15,11 +14,11 @@ class ChargeJob < ApplicationJob
 
   def execute!(charge, result) 
     ActiveRecord::Base.transaction do
-     if charge.present?
-       user_balance = charge.user.balance
-     else
-       return
-     end
+      if charge.present?
+        user_balance = charge.user.balance
+      else
+        return
+      end
 
       aquire_lock!(user_balance)
 
@@ -32,7 +31,6 @@ class ChargeJob < ApplicationJob
 
       #delete charge clomun 
       charge.destroy!
-      
     end
   end
 
