@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function() {
           });
       },
       setUpReceivedRemitRequestsStream: function(user_id) {
-        let es = new EventSource('http://localhost:3001/sse/user/' + user_id + '/received_remit_requests');
+        let es = new EventSource('/sse/user/' + user_id + '/received_remit_requests');
 
         var self = this;
         es.addEventListener('message', event => {
