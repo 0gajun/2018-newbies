@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_05_11_013408) do
+ActiveRecord::Schema.define(version: 2018_05_14_072746) do
 
   create_table "balances", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", force: :cascade do |t|
     t.bigint "user_id", null: false
@@ -39,6 +39,7 @@ ActiveRecord::Schema.define(version: 2018_05_11_013408) do
     t.string "stripe_id", null: false
     t.index ["stripe_id"], name: "index_charges_on_stripe_id", unique: true
     t.index ["user_id"], name: "index_charges_on_user_id"
+    t.index ["user_id"], name: "unique_for_duplicate_charge", unique: true
   end
 
   create_table "credit_cards", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4", force: :cascade do |t|
