@@ -52,6 +52,11 @@ RSpec.describe RemitRequest, type: :model do
         let(:requested_user) { nil }
         it { is_expected.not_to be_valid }
       end
+
+      context 'when user and requested_user are same' do
+        let(:requested_user) { user }
+        it { is_expected.not_to be_valid }
+      end
     end
   end
 

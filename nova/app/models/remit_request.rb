@@ -10,6 +10,8 @@ class RemitRequest < ApplicationRecord
                                                      greater_than_or_equal_to: Constants::MIN_REMIT_AMOUNT,
                                                      less_than_or_equal_to: Constants::MAX_REMIT_AMOUNT, }
 
+  validate :requested_user_should_be_different
+
   def accept!
     RemitService.execute!(self)
   end
@@ -24,5 +26,13 @@ class RemitRequest < ApplicationRecord
   def cancel!
     RemitRequestResult.create_from_remit_request!(self, RemitRequestResult::RESULT_CANCELED)
     destroy!
+  end
+
+  private
+
+  def requested_user_should_be_different
+    return if user != requested_user
+
+    errors.add(:requested_user, 'Cannot request a remit to yourself')
   end
 end
