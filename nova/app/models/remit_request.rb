@@ -12,6 +12,8 @@ class RemitRequest < ApplicationRecord
 
   validate :requested_user_should_be_different
 
+  after_create :publish_requested_event
+
   def accept!
     RemitService.execute!(self)
   end
