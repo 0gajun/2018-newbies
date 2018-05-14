@@ -2,6 +2,10 @@ upstream nova {
   server 127.0.0.1:3000;
 }
 
+upstream pulsar {
+  server 127.0.0.1:3001;
+}
+
 server {
   listen 80 default_server;
   server_name nova;
@@ -12,7 +16,15 @@ server {
 
   root /var/nova/current/public;
 
-  try_files $uri/index.html $uri @nova;
+  location ^~ /sse {
+    proxy_read_timeout 24h;
+    proxy_buffering off;
+    proxy_pass http://pulsar;
+  }
+
+  location / {
+    try_files $uri/index.html $uri @nova;
+  }
 
   location @nova {
     proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
@@ -25,6 +37,7 @@ server {
 
   location ~* \.(ico|css|gif|jpe?g|png|svg|js)(\?[0-9]+)?$ {
     expires max;
+    try_files $uri @nova;
     break;
   }
 
