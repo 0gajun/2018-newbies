@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/go-redis/redis"
 	"github.com/gorilla/mux"
@@ -80,6 +81,9 @@ func (s *serverImpl) handleReceivedRemitRequests() http.HandlerFunc {
 
 		ch := pubsub.Channel()
 
+		ticker := time.NewTicker(time.Duration(5) * time.Minute)
+		defer ticker.Stop()
+
 		log.Printf("Started sse for user id = %s\n", userID)
 		for {
 			select {
@@ -104,6 +108,10 @@ func (s *serverImpl) handleReceivedRemitRequests() http.HandlerFunc {
 				}
 
 				fmt.Fprintf(w, "data: %s\n\n", response)
+				flusher.Flush()
+			case t := <-ticker.C:
+				fmt.Fprintf(w, "event: ping\n")
+				fmt.Fprintf(w, "data: {\"time\": \"%s\"}", t.String())
 				flusher.Flush()
 			case <-closeNotify:
 				log.Print("Closed connection by client")
