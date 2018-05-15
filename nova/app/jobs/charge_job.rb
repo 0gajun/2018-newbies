@@ -8,8 +8,19 @@ class ChargeJob < ApplicationJob
     # Since it's a decline, Stripe::CardError will be caught
     execute!(charge, 'faild')
   rescue => e
-    errors.add(:user, e.code.to_s.to_sym)
-    throw :abort
+    body = e.json_body
+    err  = body[:error]
+    puts "Status is: #{e.http_status}"
+    puts "Type is: #{err[:type]}"
+    puts "Charge ID is: #{err[:charge]}"
+    # The following fields are optional
+    puts "Code is: #{err[:code]}" if err[:code]
+    puts "Decline code is: #{err[:decline_code]}" if err[:decline_code]
+    puts "Param is: #{err[:param]}" if err[:param]
+    puts "Message is: #{err[:message]}" if err[:message]
+    # automatical retry for sidekiq
+    puts "-----"
+    puts "Retry Job"
   end
 
   def execute!(charge, result) 
@@ -19,7 +30,7 @@ class ChargeJob < ApplicationJob
       else
         return
       end
-
+      # transactionが終了するとlockは解放される
       aquire_lock!(user_balance)
 
       increase_balance!(user_balance, charge.amount)
