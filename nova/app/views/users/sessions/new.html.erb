@@ -2,6 +2,8 @@
 
 <%= form_for(@user, url: user_session_path(@user)) do |f| %>
 
+  <%= render 'users/devise_errors' %>
+
   <div class="field control">
     <%= f.label :email %><br />
     <div class="control">
