@@ -24,8 +24,6 @@ class ChargeJob < ApplicationJob
 
       increase_balance!(user_balance, charge.amount)
 
-      release_lock!(user_balance)
-
       #add charge_history into charge_history table
       ChargeHistory.create!(amount: charge.amount, stripe_id: charge.stripe_id, result: result, user_id: charge.user_id)
 
@@ -43,8 +41,4 @@ class ChargeJob < ApplicationJob
     balance.lock!
   end
 
-  # balanceの整合性を担保するため悲観的行ロックを開放する
-  def release_lock!(balance)
-    balance.save!
-  end
 end
