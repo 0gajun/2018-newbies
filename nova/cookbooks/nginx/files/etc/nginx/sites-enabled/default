@@ -16,7 +16,7 @@ server {
 
   root /var/nova/current/public;
 
-  location ^~ /sse {
+  location /sse {
     proxy_read_timeout 24h;
     proxy_buffering off;
     proxy_pass http://pulsar;
