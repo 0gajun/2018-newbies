@@ -108,6 +108,7 @@ ActiveRecord::Schema.define(version: 2018_05_14_083620) do
 
   add_foreign_key "balances", "users"
   add_foreign_key "charge_histories", "users"
+  add_foreign_key "charges", "users"
   add_foreign_key "credit_cards", "users"
   add_foreign_key "remit_requests", "users"
 end
