@@ -21,7 +21,11 @@ class Api::ChargesController < Api::ApplicationController
   end
 
   def create
-    @charge = current_user.charges.create!(amount: params[:amount])
-    render json: @charge, status: :created
+    @charge = current_user.charges.create(amount: params[:amount])
+    if @charge.save
+      render json: @charge, status: :created
+    else
+      render json: { errors: @charge.errors.messages }, status: :bad_request
+    end
   end
 end

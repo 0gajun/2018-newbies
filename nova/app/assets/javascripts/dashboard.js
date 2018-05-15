@@ -35,6 +35,14 @@ document.addEventListener('DOMContentLoaded', function() {
     delete: function(path, params) {
       return api.request('delete', path, params);
     },
+    handleError: function(response) {
+      if (!response.ok) {
+        return response.json().then(function(err) {
+          throw err.errors;
+        })
+      }
+      return response
+    },
     request: function(method, path, params) {
       var opts = {
         method: method.toUpperCase(),
@@ -47,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
         opts.headers['Content-Type'] = 'application/json';
       };
 
-      return fetch(path, opts).then(function(response) {
+      return fetch(path, opts).then(api.handleError).then(function(response) {
         return response.json();
       });
     },
@@ -101,6 +109,11 @@ document.addEventListener('DOMContentLoaded', function() {
       if(form){ creditCard.mount(form); }
     },
     methods: {
+      // レスポンス中のerrorsの先頭メッセージを表示する
+      showAlertWithFirstError: function(errors) {
+        firstKey = Object.keys(errors)[0]
+        alert(errors[firstKey][0])
+      },
       charge: function(amount, event) {
         if(event) { event.preventDefault(); }
 
@@ -110,8 +123,8 @@ document.addEventListener('DOMContentLoaded', function() {
             self.amount += amount;
             self.charges.unshift(json);
           }).
-          catch(function(err) {
-            console.error(err);
+          catch(function(errors) {
+            self.showAlertWithFirstError(errors);
           });
       },
       registerCreditCard: function(event) {

@@ -31,7 +31,7 @@ class Charge < ApplicationRecord
     )
     self.stripe_id = res.id
   rescue Stripe::StripeError => e
-    errors.add(:user, e.code.to_s.to_sym)
+    errors.add(:user, e.message) # TODO: localekit使ってうまくエラーメッセージ表示してあげたほうが良いかも
     throw :abort
   end
 end
