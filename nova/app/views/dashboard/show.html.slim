@@ -78,6 +78,25 @@
     .column.is-12
       .heading Settings
 
+      = form_for current_user, url: user_update_path(current_user) do |f|
+        .field
+          = f.label :nickname, 'Nickname'
+          = f.text_field :nickname, class: 'input'
+
+        .field
+          = f.label :email, 'E-Mail'
+          = f.email_field :email, class: 'input'
+        .field
+          = f.label :password, 'Password'
+          = f.password_field :password, class: 'input'
+
+        .field
+          = f.label :password_confirmation, 'Password Confirmation'
+          = f.password_field :password_confirmation, class: 'input'
+
+        .has-text-right
+          = f.submit 'Update', class: 'button is-primary'
+
       form(@submit="updateUser($event)")
         .field
           label.label Nickname
@@ -91,6 +110,10 @@
           label.label Password
           .control
             input.input(type="password" v-model="user.password")
+        .field
+          label.label Password Confirmation
+          .control
+            input.input(type="password_confirmation" v-model="user.password_confirmation")
         .field
           .control.has-text-right
             button.button.is-primary(type="submit") Update
