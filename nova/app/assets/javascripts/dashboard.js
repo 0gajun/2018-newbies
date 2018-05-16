@@ -64,6 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
       currentTab: 'remits',
       amount: 0,
       charges: [],
+      charge_histories: [],
       recvRemits: [],
       sentRemits: [],
       hasCreditCard: hasCreditCard,
@@ -87,14 +88,23 @@ document.addEventListener('DOMContentLoaded', function() {
         self.user = json;
       });
 
-        api.get('/api/charges').then(function(json) {
-            self.charges = json.charges;
-            for (var i = 0; i < self.charges.length; i++){
-                var strDateTime = self.charges[i]['created_at'];
-                var myDate = new Date(strDateTime);
-                self.charges[i]['created_at'] = myDate.toLocaleString();
-            }
-        });
+      api.get('/api/charge_histories').then(function(json) {
+          self.charge_historiess = json.charge_histories;
+          for (var i = 0; i < self.charge_histories.length; i++){
+              var strDateTime = self.charge_histories[i]['created_at'];
+              var myDate = new Date(strDateTime);
+              self.charge_histories[i]['created_at'] = myDate.toLocaleString();
+          }
+      });
+
+      api.get('/api/charges').then(function(json) {
+          self.charges = json.charges;
+          for (var i = 0; i < self.charges.length; i++){
+              var strDateTime = self.charges[i]['created_at'];
+              var myDate = new Date(strDateTime);
+              self.charges[i]['created_at'] = myDate.toLocaleString();
+          }
+      });
 
       api.get('/api/balance').then(function(json) {
         self.amount = json.amount
