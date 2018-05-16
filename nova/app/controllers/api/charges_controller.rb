@@ -2,9 +2,13 @@
 
 class Api::ChargesController < Api::ApplicationController
   def index
-    @charges = current_user.charge
+    if current_user.charge.present?
+      @charge = [current_user.charge]
+    else
+      @charge = []
+    end
 
-    render json: { charges: @charges }
+    render json: { charges: @charge }
   end
 
   def create

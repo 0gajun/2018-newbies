@@ -10,11 +10,6 @@ document.addEventListener('DOMContentLoaded', function() {
   var creditCard = elements.create('card');
   var hasCreditCard = creditCardForm.getAttribute('data-found') === 'true';
 
-
-
-
-
-
   var api = {
     query: function(params) {
       var queryString = [];
@@ -117,6 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
       currentTab: 'remits',
       amount: 0,
       charges: [],
+      charge_histories: [],
       recvRemits: [],
       sentRemits: [],
       hasCreditCard: hasCreditCard,
@@ -140,14 +136,13 @@ document.addEventListener('DOMContentLoaded', function() {
         self.user = json;
       });
 
-        api.get('/api/charges').then(function(json) {
-            self.charges = json.charges;
-            for (var i = 0; i < self.charges.length; i++){
-                var strDateTime = self.charges[i]['created_at'];
-                var myDate = new Date(strDateTime);
-                self.charges[i]['created_at'] = myDate.toLocaleString();
-            }
-        });
+      api.get('/api/charges').then(function(json) {
+        self.charges = self.prettifyChargesResponse(json.charges);
+      });
+
+      api.get('/api/charge_histories').then(function(json) {
+        self.charge_histories = self.prettifyChargesResponse(json.charges);
+      });
 
       api.get('/api/balance').then(function(json) {
         self.amount = json.amount
@@ -170,6 +165,13 @@ document.addEventListener('DOMContentLoaded', function() {
       if(form){ creditCard.mount(form); }
     },
     methods: {
+      prettifyChargesResponse: function(charges) {
+        for (var i = 0; i < charges.length; i++){
+          var strDateTime = charges[i]['created_at'];
+          var myDate = new Date(strDateTime);
+          charges[i]['created_at'] = myDate.toLocaleString();
+        }
+        return charges;
       showError: function(errors) {
         errorsStore.setErrorsAction(errors)
       },
@@ -184,17 +186,36 @@ document.addEventListener('DOMContentLoaded', function() {
         var self = this;
         api.post('/api/charges', { amount: amount }).
           then(function(json) {
-            self.amount += amount; //balanceへのポーリングでやるようにする？
             var strDateTime = json['created_at'];
             json['created_at'] = new Date(strDateTime).toLocaleString();
             self.charges.unshift(json);
           }).
           finally(function(){
             self.isCharging = false
+
+            // Charge完了までポーリングを開始する
+            var timer = setInterval(function() {
+              api.get('/api/charges').then(function(json) {
+                self.charges = self.prettifyChargesResponse(json.charges);
+
+                // Chargeがなくなったことは、chargeが完了してcharge historyが作られたことを意味する
+                if (self.charges.length == 0) {
+                  clearInterval(timer);
+                  api.get('/api/charge_histories').then(function(json) {
+                    self.charge_histories = self.prettifyChargesResponse(json.charges);
+                  })
+                  api.get('/api/balance').then(function(json) {
+                    self.amount = json.amount
+                  })
+                }
+              });
+            }, 3000);
           }).
           catch(function(err) {
-            console.error(err);
+            self.showError(errors);
           });
+
+
       },
       registerCreditCard: function(event) {
         if(event) { event.preventDefault(); }

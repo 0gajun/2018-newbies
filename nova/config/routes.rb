@@ -20,6 +20,7 @@ Rails.application.routes.draw do
     resource :user, only: %i[show update]
     resource :credit_card, only: %i[show create]
     resources :charges, only: %i[index create]
+    resources :charge_histories, only: %i[index]
     resources :remit_requests, only: %i[index create] do
       member do
         post :accept
