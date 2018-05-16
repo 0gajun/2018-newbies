@@ -10,6 +10,11 @@ document.addEventListener('DOMContentLoaded', function() {
   var creditCard = elements.create('card');
   var hasCreditCard = creditCardForm.getAttribute('data-found') === 'true';
 
+
+
+
+
+
   var api = {
     query: function(params) {
       var queryString = [];
@@ -115,7 +120,9 @@ document.addEventListener('DOMContentLoaded', function() {
       recvRemits: [],
       sentRemits: [],
       hasCreditCard: hasCreditCard,
+      isRegisteringCreditCard: false,
       isActiveNewRemitForm: false,
+      isCharging: false,
       target: "",
       user: {
         email: "",
@@ -126,16 +133,25 @@ document.addEventListener('DOMContentLoaded', function() {
         amount: 0,
       },
     },
+
     beforeMount: function() {
       var self = this;
       api.get('/api/user').then(function(json) {
         self.user = json;
       });
 
-      api.get('/api/charges').then(function(json) {
-        self.amount = json.amount;
-        self.charges = json.charges;
-      });
+        api.get('/api/charges').then(function(json) {
+            self.charges = json.charges;
+            for (var i = 0; i < self.charges.length; i++){
+                var strDateTime = self.charges[i]['created_at'];
+                var myDate = new Date(strDateTime);
+                self.charges[i]['created_at'] = myDate.toLocaleString();
+            }
+        });
+
+      api.get('/api/balance').then(function(json) {
+        self.amount = json.amount
+      })
 
       api.get('/api/remit_requests', { status: 'outstanding' }).
         then(function(json) {
@@ -163,18 +179,27 @@ document.addEventListener('DOMContentLoaded', function() {
       charge: function(amount, event) {
         if(event) { event.preventDefault(); }
 
+        this.isCharging = true;
+
         var self = this;
         api.post('/api/charges', { amount: amount }).
           then(function(json) {
-            self.amount += amount;
+            self.amount += amount; //balanceへのポーリングでやるようにする？
+            var strDateTime = json['created_at'];
+            json['created_at'] = new Date(strDateTime).toLocaleString();
             self.charges.unshift(json);
           }).
-          catch(function(errors) {
-            self.showError(errors);
+          finally(function(){
+            self.isCharging = false
+          }).
+          catch(function(err) {
+            console.error(err);
           });
       },
       registerCreditCard: function(event) {
         if(event) { event.preventDefault(); }
+
+        this.isRegisteringCreditCard = true;
 
         var self = this;
         stripe.createToken(creditCard).
@@ -183,6 +208,9 @@ document.addEventListener('DOMContentLoaded', function() {
           }).
           then(function() {
             self.hasCreditCard = true;
+          }).
+          finally(function() {
+            self.isRegisteringCreditCard = false;
           });
       },
       addTarget: function(event) {

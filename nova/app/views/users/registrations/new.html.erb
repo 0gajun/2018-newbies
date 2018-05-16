@@ -1,6 +1,9 @@
 <h2>Sign up</h2>
 
 <%= form_for(@user, url: registration_path(@user)) do |f| %>
+
+  <%= render 'users/devise_errors' %>
+
   <div class="field">
     <%= f.label :nickname %>
     <div class="control">
