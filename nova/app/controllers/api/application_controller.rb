@@ -21,7 +21,6 @@ class Api::ApplicationController < ActionController::API
   # `/api` に対するCSRFを防ぐために、リクエスト先のHostとOriginが一致するかをチェックする
   # novaの画面からリクエストされたアクセスのみを許可する。
   def verify_request_from_same_origin
-    return if Rails.env.development?
     source_origin = request.origin || request.referer
     target_origin = request.headers['Host'] # port 情報も合わせて取得するためにheadersに直接アクセスする
 
