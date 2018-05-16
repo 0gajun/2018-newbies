@@ -35,6 +35,14 @@ document.addEventListener('DOMContentLoaded', function() {
     delete: function(path, params) {
       return api.request('delete', path, params);
     },
+    handleError: function(response) {
+      if (!response.ok) {
+        return response.json().then(function(err) {
+          throw err.errors;
+        })
+      }
+      return response
+    },
     request: function(method, path, params) {
       var opts = {
         method: method.toUpperCase(),
@@ -47,11 +55,56 @@ document.addEventListener('DOMContentLoaded', function() {
         opts.headers['Content-Type'] = 'application/json';
       };
 
-      return fetch(path, opts).then(function(response) {
+      return fetch(path, opts).then(api.handleError).then(function(response) {
         return response.json();
       });
     },
   };
+
+  var errorsStore = {
+    state: {
+      errors: []
+    },
+    setErrorsAction (newErrors) {
+      this.state.errors.splice(0, this.state.errors.length)
+
+      var self = this;
+
+      // { "user": ["some error messages"], "eamil": ["some error messages"] } }
+      // のように返ってくるエラーレスポンスから、メッセージだけを取り出してself.state.errorsに詰める
+      Object.keys(newErrors).forEach(function(key) {
+        Array.prototype.push.apply(self.state.errors, newErrors[key]);
+      });
+    },
+    clearErrorsAction () {
+      this.state.errors.splice(0, this.state.errors.length)
+    }
+  };
+
+  Vue.component('error-box', {
+    data: function () {
+      return {
+        errorsStoreState: errorsStore.state
+      };
+    },
+    methods: {
+      hide: function() {
+        errorsStore.clearErrorsAction();
+      },
+    },
+    template: `
+      <article class="message is-danger" v-if="errorsStoreState.errors.length != 0">
+        <div class="message-header">
+          <p>Error</p>
+          <button class="delete" aria-label="delete" @click="hide"></button>
+        </div>
+        <div class="message-body">
+          <ul>
+            <li v-for="error in errorsStoreState.errors">{{ error }}</li>
+          </ul>
+        </div>
+      </article>`
+  });
 
   var dashboard = new Vue({
     el: '#dashboard',
@@ -119,6 +172,11 @@ document.addEventListener('DOMContentLoaded', function() {
           charges[i]['created_at'] = myDate.toLocaleString();
         }
         return charges;
+      showError: function(errors) {
+        errorsStore.setErrorsAction(errors)
+      },
+      removeError: function(errors) {
+        errorsStore.clearErrorsAction(errors)
       },
       charge: function(amount, event) {
         if(event) { event.preventDefault(); }
