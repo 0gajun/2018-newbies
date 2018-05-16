@@ -21,8 +21,10 @@ class Api::ChargesController < Api::ApplicationController
   end
 
   def create
-    @charge = current_user.charges.create!(amount: params[:amount])
-    ChargeJob.perform_later(@charge)
-    render json: @charge, status: :created
+    ActiveRecord::Base.transaction do
+      @charge = current_user.create_charge!(amount: params[:amount])
+      ChargeJob.perform_later(@charge)
+      render json: @charge, status: :created
+    end
   end
 end

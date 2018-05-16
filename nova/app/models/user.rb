@@ -12,7 +12,7 @@ class User < ApplicationRecord
   has_many :charge_histories, dependent: :destroy
   has_one :credit_card, dependent: :destroy
   has_one :balance, dependent: :destroy
-  has_one :charges, dependent: :destroy
+  has_one :charge, dependent: :destroy
 
   validates :nickname, presence: true
   validates :email, presence: true, uniqueness: true
