@@ -4,6 +4,7 @@ html(lang="#{I18n.locale}" class="#{html_classes.join(' ')}")
     meta(charset="utf-8")
     = display_meta_tags(default_meta_tags)
     = stylesheet_link_tag :application, media: 'all'
+     = stylesheet_link_tag "https://use.fontawesome.com/releases/v5.0.13/css/all.css", integrity: "sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp", crossorigin: "anonymous"
     = javascript_include_tag :application, defer: true
     = content_for?(:head) ? yield(:head) : nil
     = csrf_meta_tags

@@ -70,10 +70,12 @@
             thead
               tr
                 th Amount
+                th Status
                 th.has-text-right Date
             tbody
               tr(v-for="charge in charges")
                 td= '{{charge.amount}}円'
+                td= 'charging'
                 td.has-text-right= '{{charge.created_at}}'
       .columns
         .column.is-12
@@ -82,10 +84,12 @@
             thead
               tr
                 th Amount
+                th Status
                 th.has-text-right Date
             tbody
               tr(v-for="charge_history in charge_histories")
                 td= '{{charge_history.amount}}円'
+                td= '{{charge_history.result}}'
                 td.has-text-right= '{{charge_history.created_at}}'
 
   .columns(v-if="currentTab === 'settings'")
