@@ -61,6 +61,48 @@ document.addEventListener('DOMContentLoaded', function() {
     },
   };
 
+  var errorsStore = {
+    state: {
+      errors: []
+    },
+    setErrorsAction (newErrors) {
+      this.state.errors.splice(0, this.state.errors.length)
+
+      var self = this;
+      Object.keys(newErrors).forEach(function(key) {
+        Array.prototype.push.apply(self.state.errors, newErrors[key]);
+      });
+    },
+    clearErrorsAction () {
+      this.state.errors.splice(0, this.state.errors.length)
+    }
+  };
+
+  Vue.component('error-box', {
+    data: function () {
+      return {
+        errorsStoreState: errorsStore.state
+      };
+    },
+    methods: {
+      hide: function() {
+        errorsStore.clearErrorsAction();
+      },
+    },
+    template: `
+      <article class="message is-danger" v-if="errorsStoreState.errors.length != 0">
+        <div class="message-header">
+          <p>Error</p>
+          <button class="delete" aria-label="delete" @click="hide"></button>
+        </div>
+        <div class="message-body">
+          <ul>
+            <li v-for="error in errorsStoreState.errors">{{ error }}</li>
+          </ul>
+        </div>
+      </article>`
+  });
+
   var dashboard = new Vue({
     el: '#dashboard',
     data: {
@@ -109,10 +151,11 @@ document.addEventListener('DOMContentLoaded', function() {
       if(form){ creditCard.mount(form); }
     },
     methods: {
-      // レスポンス中のerrorsの先頭メッセージを表示する
-      showAlertWithFirstError: function(errors) {
-        firstKey = Object.keys(errors)[0]
-        alert(errors[firstKey][0])
+      showError: function(errors) {
+        errorsStore.setErrorsAction(errors)
+      },
+      removeError: function(errors) {
+        errorsStore.clearErrorsAction(errors)
       },
       charge: function(amount, event) {
         if(event) { event.preventDefault(); }
@@ -124,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function() {
             self.charges.unshift(json);
           }).
           catch(function(errors) {
-            self.showAlertWithFirstError(errors);
+            self.showError(errors);
           });
       },
       registerCreditCard: function(event) {
