@@ -2,8 +2,9 @@
 
 class Charge < ApplicationRecord
   belongs_to :user
-
-  validates :amount, numericality: { greater_then: 0 }
+  validates :amount, presence: true, numericality: { only_integer: true,
+                                                     greater_than_or_equal_to: 1,
+                                                     less_than_or_equal_to: 99_999_999 }
   before_create :create_stripe_charge
 
   def finalize
