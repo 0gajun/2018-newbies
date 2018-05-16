@@ -5,9 +5,12 @@ class ChargeJob < ApplicationJob
     #raise Stripe::CardError.new("hoge", {}, :missing)
     #raise Stripe::InvalidRequestError.new("hoge", {})
     #raise Stripe::APIConnectionError.new()
+    user_id = charge.user_id
 
     capture_response = Stripe::Charge.retrieve(charge.stripe_id).capture
     execute!(charge, 'charged')
+
+    publish_finished_event(user_id)
 
   rescue Stripe::CardError => e
     # Since it's a decline, Stripe::CardError will be caught
@@ -24,7 +27,7 @@ class ChargeJob < ApplicationJob
    throw e
   end
 
-  def execute!(charge, result) 
+  def execute!(charge, result)
     ActiveRecord::Base.transaction do
       if charge.present?
         user_balance = charge.user.balance
@@ -42,7 +45,7 @@ class ChargeJob < ApplicationJob
       #add charge_history into charge_history table
       ChargeHistory.create!(amount: charge.amount, stripe_id: charge.stripe_id, result: result, user_id: charge.user_id)
 
-      #delete charge clomun 
+      #delete charge clomun
       charge.destroy!
     end
   end
@@ -56,4 +59,7 @@ class ChargeJob < ApplicationJob
     balance.lock!
   end
 
+  def publish_finished_event(user_id)
+    Redis.current.publish("user.#{user_id}.finished_charges", {id: 0}.to_json)
+  end
 end

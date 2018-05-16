@@ -36,6 +36,19 @@ services:
       REDIS_HOST: "redis"
     depends_on:
       - db
+  sidekiq:
+    build: .
+    command: bundle exec sidekiq
+    tty: true
+    stdin_open: true
+    volumes:
+      - .:/app/nova:cached
+    environment:
+      DATABASE_HOST: "db"
+      REDIS_HOST: "redis"
+    depends_on:
+      - db
+      - redis
   pulsar:
     build:
       context: ../pulsar

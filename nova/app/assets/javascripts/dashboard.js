@@ -299,11 +299,31 @@ document.addEventListener('DOMContentLoaded', function() {
           });
       },
       setUpReceivedRemitRequestsStream: function(user_id) {
-        let es = new EventSource('/sse/user/' + user_id + '/received_remit_requests');
+        // let es = new EventSource('/sse/user/' + user_id + '/received_remit_requests');
+        //
+        // var self = this;
+        // es.addEventListener('received_remit_requests', event => {
+        //   self.refreshRemitRequests();
+        // });
+        let es = new EventSource('/sse/user/' + user_id);
 
         var self = this;
-        es.addEventListener('message', event => {
+        es.addEventListener('received_remit_requests', event => {
           self.refreshRemitRequests();
+        });
+        es.addEventListener('finished_charges', event => {
+          api.get('/api/charges').then(function(json) {
+            self.charges = self.prettifyChargesResponse(json.charges);
+          })
+          api.get('/api/charge_histories').then(function(json) {
+            self.charge_histories = self.prettifyChargesResponse(json.charges);
+          })
+          api.get('/api/balance').then(function(json) {
+            self.amount = json.amount
+          })
+        });
+        es.addEventListener('ping', event => {
+          console.log('pong')
         });
       }
     }
