@@ -78,7 +78,7 @@
     .column.is-12
       .heading Settings
 
-      = form_for current_user, url: user_update_path(current_user) do |f|
+      = form_for current_user, url: user_update_path(@user), html: { method: :put } do |f|
         .field
           = f.label :nickname, 'Nickname'
           = f.text_field :nickname, class: 'input'
@@ -94,29 +94,13 @@
           = f.label :password_confirmation, 'Password Confirmation'
           = f.password_field :password_confirmation, class: 'input'
 
+        .field
+          = f.label :current_password
+          .control
+            = f.password_field :current_password, class: 'input'
+
         .has-text-right
           = f.submit 'Update', class: 'button is-primary'
-
-      form(@submit="updateUser($event)")
-        .field
-          label.label Nickname
-          .control
-            input.input(type="text" v-model="user.nickname")
-        .field
-          label.label E-Mail
-          .control
-            input.input(type="email" v-model="user.email")
-        .field
-          label.label Password
-          .control
-            input.input(type="password" v-model="user.password")
-        .field
-          label.label Password Confirmation
-          .control
-            input.input(type="password_confirmation" v-model="user.password_confirmation")
-        .field
-          .control.has-text-right
-            button.button.is-primary(type="submit") Update
 
   .modal(:class='{ "is-active": isActiveNewRemitForm }')
     .modal-background(@click.prevent="isActiveNewRemitForm = false")

@@ -10,6 +10,7 @@ Rails.application.routes.draw do
     post   'users',               to: 'users/registrations#create', as: 'user_registration'
     get    '/users/confirmation', to: 'devise/confirmations#show',  as: 'user_confirmation'
     put    'users',               to: 'users/registration#update',  as: 'user_update'
+    get    'users',               to: 'users/sessions#new'
   end
 
   if Rails.env.development?
