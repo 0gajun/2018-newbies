@@ -8,9 +8,8 @@ Rails.application.routes.draw do
     delete 'users/sign_out',      to: 'users/sessions#destroy',     as: 'destroy_user_session'
     get    'users/sign_up',       to: 'users/registrations#new',    as: 'new_user_registration'
     post   'users',               to: 'users/registrations#create', as: 'user_registration'
-    get    '/users/confirmation', to: 'devise/confirmations#show',  as: 'user_confirmation'
-    put    'users',               to: 'users/registration#update',  as: 'user_update'
-    get    'users',               to: 'users/sessions#new'
+    get    'users/confirmation',  to: 'devise/confirmations#show',  as: 'user_confirmation'
+    put    'users',               to: 'users/registrations#update', as: 'user_update'
   end
 
   if Rails.env.development?
