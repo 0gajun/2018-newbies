@@ -7,3 +7,4 @@ end
 Sidekiq.configure_client do |config|
   config.redis = { url: "redis://#{redis_host}:6379", namespace: 'sidekiq'  }
 end
+
