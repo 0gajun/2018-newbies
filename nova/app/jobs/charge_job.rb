@@ -4,6 +4,7 @@ class ChargeJob < ApplicationJob
   def perform(charge)
     #raise Stripe::CardError.new("hoge", {}, :missing)
     #raise Stripe::InvalidRequestError.new("hoge", {})
+    #raise Stripe::APIConnectionError.new()
 
     capture_response = Stripe::Charge.retrieve(charge.stripe_id).capture
     execute!(charge, 'charged')
@@ -20,6 +21,7 @@ class ChargeJob < ApplicationJob
     # automatical retry for sidekiq
    puts "-----"
    puts "Retry Job"
+   throw :abort
   end
 
   def execute!(charge, result) 
