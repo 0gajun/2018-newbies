@@ -2,7 +2,7 @@
 
 class Api::ChargesController < Api::ApplicationController
   def index
-    @charges = current_user.charges.order(id: :desc).limit(50)
+    @charges = current_user.charge
 
     render json: { charges: @charges }
   end

@@ -29,7 +29,7 @@ module Nova
 
     # Don't generate system test files.
     config.generators.system_tests = nil
-    
+
     # To use sidekiq
     config.active_job.queue_adapter = :sidekiq
 
