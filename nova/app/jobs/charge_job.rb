@@ -6,33 +6,40 @@ class ChargeJob < ApplicationJob
     execute!(charge, 'charged')
   rescue Stripe::CardError => e
     # Since it's a decline, Stripe::CardError will be caught
-    #charge_historyのresultをerrorにする
     execute!(charge, 'faild')
   rescue => e
-    errors.add(:user, e.code.to_s.to_sym)
-    throw :abort
+    body = e.json_body
+    err  = body[:error]
+    puts "Status is: #{e.http_status}"
+    puts "Type is: #{err[:type]}"
+    puts "Charge ID is: #{err[:charge]}"
+    # The following fields are optional
+    puts "Code is: #{err[:code]}" if err[:code]
+    puts "Decline code is: #{err[:decline_code]}" if err[:decline_code]
+    puts "Param is: #{err[:param]}" if err[:param]
+    puts "Message is: #{err[:message]}" if err[:message]
+    # automatical retry for sidekiq
+    puts "-----"
+    puts "Retry Job"
   end
 
   def execute!(charge, result) 
     ActiveRecord::Base.transaction do
-     if charge.present?
-       user_balance = charge.user.balance
-     else
-       return
-     end
-
+      if charge.present?
+        user_balance = charge.user.balance
+      else
+        return
+      end
+      # transactionが終了するとlockは解放される
       aquire_lock!(user_balance)
 
       increase_balance!(user_balance, charge.amount)
-
-      release_lock!(user_balance)
 
       #add charge_history into charge_history table
       ChargeHistory.create!(amount: charge.amount, stripe_id: charge.stripe_id, result: result, user_id: charge.user_id)
 
       #delete charge clomun 
       charge.destroy!
-      
     end
   end
 
@@ -45,8 +52,4 @@ class ChargeJob < ApplicationJob
     balance.lock!
   end
 
-  # balanceの整合性を担保するため悲観的行ロックを開放する
-  def release_lock!(balance)
-    balance.save!
-  end
 end
