@@ -69,6 +69,9 @@ document.addEventListener('DOMContentLoaded', function() {
       this.state.errors.splice(0, this.state.errors.length)
 
       var self = this;
+
+      // { "user": ["some error messages"], "eamil": ["some error messages"] } }
+      // のように返ってくるエラーレスポンスから、メッセージだけを取り出してself.state.errorsに詰める
       Object.keys(newErrors).forEach(function(key) {
         Array.prototype.push.apply(self.state.errors, newErrors[key]);
       });
