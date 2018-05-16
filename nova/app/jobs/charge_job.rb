@@ -21,7 +21,7 @@ class ChargeJob < ApplicationJob
     # automatical retry for sidekiq
    puts "-----"
    puts "Retry Job"
-   throw :abort
+   throw e
   end
 
   def execute!(charge, result) 
