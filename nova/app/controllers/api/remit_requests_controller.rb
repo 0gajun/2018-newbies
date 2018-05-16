@@ -5,7 +5,7 @@ class Api::RemitRequestsController < Api::ApplicationController
   before_action :correct_user, only: %i[accept reject cancel]
 
   def index
-    @remit_requests = current_user.received_remit_requests.joins(:user).includes(:user).order(id: :desc).limit(50)
+    @remit_requests = current_user.received_remit_requests.preload(:user).order(id: :desc).limit(50)
 
     render json: @remit_requests.as_json(include: :user)
   end
