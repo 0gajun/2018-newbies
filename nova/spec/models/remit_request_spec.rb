@@ -7,6 +7,59 @@ RSpec.describe RemitRequest, type: :model do
 
   it { is_expected.to be_valid }
 
+  describe 'validation' do
+    subject do
+      build(:remit_request, amount: amount, user: user, requested_user: requested_user)
+    end
+
+    let (:amount) { 1000 }
+    let (:user) { create(:user) }
+    let (:requested_user) { create(:user) }
+
+    describe 'amount' do
+      it { is_expected.to be_valid }
+
+      context 'with negative amount' do
+        let (:amount) { -1 }
+        it { is_expected.not_to be_valid }
+      end
+
+      context 'with zero amount' do
+        let (:amount) { 0 }
+        it { is_expected.not_to be_valid }
+      end
+
+      context 'with max amount' do
+        let (:amount) { 99_999_999 }
+        it { is_expected.to be_valid }
+      end
+
+      context 'with too large amount' do
+        let (:amount) { 100_000_000 }
+        it { is_expected.not_to be_valid }
+      end
+    end
+
+    describe 'user' do
+      context 'with nil user' do
+        let(:user) { nil }
+        it { is_expected.not_to be_valid }
+      end
+    end
+
+    describe 'requested_user' do
+      context 'with nil user' do
+        let(:requested_user) { nil }
+        it { is_expected.not_to be_valid }
+      end
+
+      context 'when user and requested_user are same' do
+        let(:requested_user) { user }
+        it { is_expected.not_to be_valid }
+      end
+    end
+  end
+
   describe 'method' do
     let(:request_user_amount) { 1000 }
 
