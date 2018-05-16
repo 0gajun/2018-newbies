@@ -172,6 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
           charges[i]['created_at'] = myDate.toLocaleString();
         }
         return charges;
+      },
       showError: function(errors) {
         errorsStore.setErrorsAction(errors)
       },
