@@ -35,6 +35,14 @@ document.addEventListener('DOMContentLoaded', function() {
     delete: function(path, params) {
       return api.request('delete', path, params);
     },
+    handleError: function(response) {
+      if (!response.ok) {
+        return response.json().then(function(err) {
+          throw err.errors;
+        })
+      }
+      return response
+    },
     request: function(method, path, params) {
       var opts = {
         method: method.toUpperCase(),
@@ -47,11 +55,56 @@ document.addEventListener('DOMContentLoaded', function() {
         opts.headers['Content-Type'] = 'application/json';
       };
 
-      return fetch(path, opts).then(function(response) {
+      return fetch(path, opts).then(api.handleError).then(function(response) {
         return response.json();
       });
     },
   };
+
+  var errorsStore = {
+    state: {
+      errors: []
+    },
+    setErrorsAction (newErrors) {
+      this.state.errors.splice(0, this.state.errors.length)
+
+      var self = this;
+
+      // { "user": ["some error messages"], "eamil": ["some error messages"] } }
+      // のように返ってくるエラーレスポンスから、メッセージだけを取り出してself.state.errorsに詰める
+      Object.keys(newErrors).forEach(function(key) {
+        Array.prototype.push.apply(self.state.errors, newErrors[key]);
+      });
+    },
+    clearErrorsAction () {
+      this.state.errors.splice(0, this.state.errors.length)
+    }
+  };
+
+  Vue.component('error-box', {
+    data: function () {
+      return {
+        errorsStoreState: errorsStore.state
+      };
+    },
+    methods: {
+      hide: function() {
+        errorsStore.clearErrorsAction();
+      },
+    },
+    template: `
+      <article class="message is-danger" v-if="errorsStoreState.errors.length != 0">
+        <div class="message-header">
+          <p>Error</p>
+          <button class="delete" aria-label="delete" @click="hide"></button>
+        </div>
+        <div class="message-body">
+          <ul>
+            <li v-for="error in errorsStoreState.errors">{{ error }}</li>
+          </ul>
+        </div>
+      </article>`
+  });
 
   var dashboard = new Vue({
     el: '#dashboard',
@@ -59,10 +112,13 @@ document.addEventListener('DOMContentLoaded', function() {
       currentTab: 'remits',
       amount: 0,
       charges: [],
+      charge_histories: [],
       recvRemits: [],
       sentRemits: [],
       hasCreditCard: hasCreditCard,
+      isRegisteringCreditCard: false,
       isActiveNewRemitForm: false,
+      isCharging: false,
       target: "",
       user: {
         email: "",
@@ -73,6 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
         amount: 0,
       },
     },
+
     beforeMount: function() {
       var self = this;
       api.get('/api/user').then(function(json) {
@@ -80,9 +137,16 @@ document.addEventListener('DOMContentLoaded', function() {
       });
 
       api.get('/api/charges').then(function(json) {
-        self.amount = json.amount;
-        self.charges = json.charges;
+        self.charges = self.prettifyChargesResponse(json.charges);
       });
+
+      api.get('/api/charge_histories').then(function(json) {
+        self.charge_histories = self.prettifyChargesResponse(json.charges);
+      });
+
+      api.get('/api/balance').then(function(json) {
+        self.amount = json.amount
+      })
 
       api.get('/api/remit_requests', { status: 'outstanding' }).
         then(function(json) {
@@ -101,21 +165,62 @@ document.addEventListener('DOMContentLoaded', function() {
       if(form){ creditCard.mount(form); }
     },
     methods: {
+      prettifyChargesResponse: function(charges) {
+        for (var i = 0; i < charges.length; i++){
+          var strDateTime = charges[i]['created_at'];
+          var myDate = new Date(strDateTime);
+          charges[i]['created_at'] = myDate.toLocaleString();
+        }
+        return charges;
+      showError: function(errors) {
+        errorsStore.setErrorsAction(errors)
+      },
+      removeError: function(errors) {
+        errorsStore.clearErrorsAction(errors)
+      },
       charge: function(amount, event) {
         if(event) { event.preventDefault(); }
+
+        this.isCharging = true;
 
         var self = this;
         api.post('/api/charges', { amount: amount }).
           then(function(json) {
-            self.amount += amount;
+            var strDateTime = json['created_at'];
+            json['created_at'] = new Date(strDateTime).toLocaleString();
             self.charges.unshift(json);
           }).
+          finally(function(){
+            self.isCharging = false
+
+            // Charge完了までポーリングを開始する
+            var timer = setInterval(function() {
+              api.get('/api/charges').then(function(json) {
+                self.charges = self.prettifyChargesResponse(json.charges);
+
+                // Chargeがなくなったことは、chargeが完了してcharge historyが作られたことを意味する
+                if (self.charges.length == 0) {
+                  clearInterval(timer);
+                  api.get('/api/charge_histories').then(function(json) {
+                    self.charge_histories = self.prettifyChargesResponse(json.charges);
+                  })
+                  api.get('/api/balance').then(function(json) {
+                    self.amount = json.amount
+                  })
+                }
+              });
+            }, 3000);
+          }).
           catch(function(err) {
-            console.error(err);
+            self.showError(errors);
           });
+
+
       },
       registerCreditCard: function(event) {
         if(event) { event.preventDefault(); }
+
+        this.isRegisteringCreditCard = true;
 
         var self = this;
         stripe.createToken(creditCard).
@@ -124,6 +229,9 @@ document.addEventListener('DOMContentLoaded', function() {
           }).
           then(function() {
             self.hasCreditCard = true;
+          }).
+          finally(function() {
+            self.isRegisteringCreditCard = false;
           });
       },
       addTarget: function(event) {
