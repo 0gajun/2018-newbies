@@ -68,9 +68,6 @@ ActiveRecord::Schema.define(version: 2018_05_14_083620) do
     t.bigint "user_id", null: false
     t.bigint "requested_user_id", null: false
     t.integer "amount", null: false
-    t.datetime "accepted_at"
-    t.datetime "rejected_at"
-    t.datetime "canceled_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["requested_user_id"], name: "index_remit_requests_on_requested_user_id"

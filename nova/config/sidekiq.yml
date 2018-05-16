@@ -1,0 +1,13 @@
+---
+:verbose: false
+:concurrency: 5
+:timeout: 30
+
+:queues:
+  - default
+  - mailers
+
+production:
+  :concurrency: 10
+  :pidfile: /var/nova/current/tmp/pids/sidekiq.pid
+  :logfile: /var/nova/current/log/sidekiq.log
