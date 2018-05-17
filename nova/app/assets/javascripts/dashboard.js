@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
     el: '#dashboard',
     data: {
       currentTab: 'remits',
-      amount: 0,
+      amount: undefined,
       charges: [],
       charge_histories: [],
       recvRemits: [],
