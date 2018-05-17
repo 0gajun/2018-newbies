@@ -27,14 +27,14 @@
         a.button(:disabled="!hasCreditCard" @click="charge(1000, $event)" v-bind:class="{ 'is-loading': isCharging }") 1,000円
         a.button(:disabled="!hasCreditCard" @click="charge(5000, $event)" v-bind:class="{ 'is-loading': isCharging }") 5,000円
 
-  .columns.
+  .columns
     .column.is-12
       .is-clearfix
         .is-pulled-right
           .tabs.is-small
             ul
               li(:class= "{'is-active': currentTab === 'settings'}")
-                a(@click="currentTab = 'settings'") Settings
+                a(@click="currentTab = 'contact'") Contact
         .tabs.is-small
           ul
             li(:class= "{'is-active': currentTab === 'remits'}")
@@ -96,26 +96,12 @@
                 td= '{{charge_history.result}}'
                 td.has-text-right= '{{charge_history.created_at}}'
 
-  .columns(v-if="currentTab === 'settings'")
+  .columns(v-if="currentTab === 'contact'")
     .column.is-12
-      .heading Settings
-
-      form(@submit="updateUser($event)")
-        .field
-          label.label Nickname
-          .control
-            input.input(type="text" v-model="user.nickname")
-        .field
-          label.label E-Mail
-          .control
-            input.input(type="email" v-model="user.email")
-        .field
-          label.label Password
-          .control
-            input.input(type="password" v-model="user.password")
-        .field
-          .control.has-text-right
-            button.button.is-primary(type="submit") Update
+      .heading Contact
+      .section.has-text-centered If you want to change your information. Please contact us
+      .span.has-text-centered
+        =mail_to "customer.support@mf2018.youki.io"
 
   .modal(:class='{ "is-active": isActiveNewRemitForm }')
     .modal-background(@click.prevent="isActiveNewRemitForm = false")

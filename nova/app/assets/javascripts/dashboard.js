@@ -200,7 +200,6 @@ document.addEventListener('DOMContentLoaded', function() {
             self.charges.unshift(json);
           }).
           finally(function(){
-            self.isCharging = false
 
             // Charge完了までポーリングを開始する
             var timer = setInterval(function() {
@@ -215,6 +214,7 @@ document.addEventListener('DOMContentLoaded', function() {
                   })
                   api.get('/api/balance').then(function(json) {
                     self.amount = json.amount
+                    self.isCharging = false;
                   })
                 }
               });
@@ -223,8 +223,6 @@ document.addEventListener('DOMContentLoaded', function() {
           catch(function(errors) {
             self.showError(errors);
           });
-
-
       },
       registerCreditCard: function(event) {
         if(event) { event.preventDefault(); }
@@ -310,14 +308,11 @@ document.addEventListener('DOMContentLoaded', function() {
       updateUser: function(event) {
         if(event) { event.preventDefault(); }
 
-        var self = this;
-        api.put('/api/user', { user: this.user }).
-          then(function(json) {
-            self.user = json;
-          }).
-          catch(function(errors) {
-            self.showError(errors);
-          });
+      //  var self = this;
+      //  api.put('/users', { user: this.user }).//次root_pathにリダイレクトしてもいいんじゃないか
+      //    then(function(json) {
+      //      self.user = json;
+      //    });
       },
     }
   });
