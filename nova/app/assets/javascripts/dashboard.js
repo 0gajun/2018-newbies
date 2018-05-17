@@ -192,7 +192,6 @@ document.addEventListener('DOMContentLoaded', function() {
             self.charges.unshift(json);
           }).
           finally(function(){
-            self.isCharging = false
 
             // Charge完了までポーリングを開始する
             var timer = setInterval(function() {
@@ -207,6 +206,7 @@ document.addEventListener('DOMContentLoaded', function() {
                   })
                   api.get('/api/balance').then(function(json) {
                     self.amount = json.amount
+                    self.isCharging = false;
                   })
                 }
               });
@@ -215,8 +215,6 @@ document.addEventListener('DOMContentLoaded', function() {
           catch(function(err) {
             self.showError(errors);
           });
-
-
       },
       registerCreditCard: function(event) {
         if(event) { event.preventDefault(); }
