@@ -9,7 +9,7 @@ Rails.application.routes.draw do
     get    'users/sign_up',       to: 'users/registrations#new',    as: 'new_user_registration'
     post   'users',               to: 'users/registrations#create', as: 'user_registration'
     get    'users/confirmation',  to: 'devise/confirmations#show',  as: 'user_confirmation'
-    put    'users',               to: 'users/registrations#update', as: 'user_update'
+    # put    'users',               to: 'users/registrations#update', as: 'user_update'
   end
 
   if Rails.env.development?
@@ -18,7 +18,7 @@ Rails.application.routes.draw do
   end
 
   namespace :api, defaults: { format: 'json' } do
-    resource :user, only: %i[show update]
+    resource :user, only: %i[show update] # TODO: 余計なpathを消す
     resource :credit_card, only: %i[show create]
     resources :charges, only: %i[index create]
     resources :remit_requests, only: %i[index create] do

@@ -23,7 +23,7 @@
         a.button(:disabled="!hasCreditCard" @click="charge(1000, $event)" v-bind:class="{ 'is-loading': isCharging }") 1,000円
         a.button(:disabled="!hasCreditCard" @click="charge(5000, $event)" v-bind:class="{ 'is-loading': isCharging }") 5,000円
 
-  .columns.
+  .columns
     .column.is-12
       .is-clearfix
         .is-pulled-right
@@ -76,9 +76,11 @@
 
   .columns(v-if="currentTab === 'settings'")
     .column.is-12
-      .heading Settings
-
-      = form_for current_user, url: user_update_path(@user), html: { method: :put } do |f|
+      .heading setting
+      .section.has-text-centered If you want to change your information. Please contact us
+      .span.has-text-centered
+        =mail_to "hogehoge@hoge.com"
+      //= form_for current_user, url: user_update_path(@user), html: { method: :put } do |f|
         .field
           = f.label :nickname, 'Nickname'
           = f.text_field :nickname, class: 'input'
