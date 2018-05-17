@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 class Api::RemitRequestsController < Api::ApplicationController
-  before_action :exists_remit_request, only: %i[accept, reject, cancel]
-  before_action :correct_user, only: %i[accept, reject, cancel]
+  before_action :exists_remit_request, only: %i[accept reject cancel]
+  before_action :correct_user, only: %i[accept reject cancel]
 
   def index
-    @remit_requests = current_user.received_remit_requests.order(id: :desc).limit(50)
+    @remit_requests = current_user.received_remit_requests.preload(:user).order(id: :desc).limit(50)
 
     render json: @remit_requests.as_json(include: :user)
   end
@@ -26,7 +26,7 @@ class Api::RemitRequestsController < Api::ApplicationController
 
     render json: {}, status: :ok
   rescue RemitService::InsufficientBalanceError
-    render json: { errors: ["Insufficient balance"] }, status: :bad_request
+    render json: { errors: ['Insufficient balance'] }, status: :bad_request
   end
 
   def reject
@@ -42,6 +42,7 @@ class Api::RemitRequestsController < Api::ApplicationController
   end
 
   private
+
   def exists_remit_request
     render json: {}, status: :not_found unless remit_request
   end
