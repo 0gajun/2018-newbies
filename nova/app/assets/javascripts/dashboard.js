@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function() {
               });
             }, 3000);
           }).
-          catch(function(err) {
+          catch(function(errors) {
             self.showError(errors);
           });
 
