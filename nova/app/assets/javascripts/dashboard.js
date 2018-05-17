@@ -70,11 +70,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
       var self = this;
 
-      // { "user": ["some error messages"], "eamil": ["some error messages"] } }
-      // のように返ってくるエラーレスポンスから、メッセージだけを取り出してself.state.errorsに詰める
-      Object.keys(newErrors).forEach(function(key) {
-        Array.prototype.push.apply(self.state.errors, newErrors[key]);
-      });
+      if (Array.isArray(newErrors))  {
+        Array.prototype.push.apply(self.state.errors, newErrors)
+      } else {
+        // { "user": ["error A"], "eamil": ["error B"] } }
+        // のように返ってくるエラーレスポンスから、
+        // ["user error A", "email error B"] のような配列を作成してself.state.errorsに詰める
+        Object.keys(newErrors).forEach(function(key) {
+          mapedErrors = newErrors[key].map(error => {
+            return key + " " + error;
+          });
+          Array.prototype.push.apply(self.state.errors, mapedErrors);
+        });
+      }
     },
     clearErrorsAction () {
       this.state.errors.splice(0, this.state.errors.length)
