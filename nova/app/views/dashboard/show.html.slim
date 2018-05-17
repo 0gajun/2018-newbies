@@ -30,7 +30,7 @@
           .tabs.is-small
             ul
               li(:class= "{'is-active': currentTab === 'settings'}")
-                a(@click="currentTab = 'settings'") Settings
+                a(@click="currentTab = 'contact'") Contact
         .tabs.is-small
           ul
             li(:class= "{'is-active': currentTab === 'remits'}")
@@ -74,12 +74,12 @@
             td= '{{charge.amount}}円'
             td.has-text-right= '{{charge.created_at}}'
 
-  .columns(v-if="currentTab === 'settings'")
+  .columns(v-if="currentTab === 'contact'")
     .column.is-12
-      .heading setting
+      .heading Contact
       .section.has-text-centered If you want to change your information. Please contact us
       .span.has-text-centered
-        =mail_to "hogehoge@hoge.com"
+        =mail_to "customer.support@mf2018.youki.io"
 
   .modal(:class='{ "is-active": isActiveNewRemitForm }')
     .modal-background(@click.prevent="isActiveNewRemitForm = false")
