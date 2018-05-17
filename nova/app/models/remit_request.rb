@@ -45,6 +45,6 @@ class RemitRequest < ApplicationRecord
   def requested_user_should_be_different
     return if user != requested_user
 
-    errors.add(:requested_user, 'Cannot request a remit to yourself')
+    errors.add(:user, 'Cannot request a remit to yourself')
   end
 end

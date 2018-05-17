@@ -36,7 +36,7 @@ class Api::ApplicationController < ActionController::API
   def record_invalid(exception)
     errors = exception.record.errors.full_messages
 
-    render json: { errors: errors }, status: :unprocessable_entity
+    render json: { errors: exception.record.errors }, status: :unprocessable_entity
   end
 
   def record_not_found(exception)
