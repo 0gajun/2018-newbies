@@ -229,6 +229,8 @@ GEM
     responders (2.4.0)
       actionpack (>= 4.2.0, < 5.3)
       railties (>= 4.2.0, < 5.3)
+    rollbar (2.15.6)
+      multi_json
     rspec-core (3.7.1)
       rspec-support (~> 3.7.0)
     rspec-expectations (3.7.0)
@@ -367,6 +369,7 @@ DEPENDENCIES
   rails-controller-testing
   rails-i18n
   redis-namespace
+  rollbar
   rspec-rails
   rspec_junit_formatter
   rubocop
