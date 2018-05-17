@@ -261,6 +261,9 @@ document.addEventListener('DOMContentLoaded', function() {
             };
             self.target = '';
             self.isActiveNewRemitForm = false;
+          }).
+          catch(function(errors) {
+            self.showError(errors);
           });
       },
       accept: function(id, event) {
@@ -277,6 +280,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 return false
               }
             });
+          }).
+          catch(function(errors) {
+            self.showError(errors);
           });
       },
       reject: function(id, event) {
@@ -288,6 +294,9 @@ document.addEventListener('DOMContentLoaded', function() {
             self.recvRemits = self.recvRemits.filter(function(r) {
               return r.id != id;
             });
+          }).
+          catch(function(errors) {
+            self.showError(errors);
           });
       },
       updateUser: function(event) {
@@ -297,6 +306,9 @@ document.addEventListener('DOMContentLoaded', function() {
         api.put('/api/user', { user: this.user }).
           then(function(json) {
             self.user = json;
+          }).
+          catch(function(errors) {
+            self.showError(errors);
           });
       },
     }
