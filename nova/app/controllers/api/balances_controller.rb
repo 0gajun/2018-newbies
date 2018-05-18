@@ -2,6 +2,6 @@
 
 class Api::BalancesController < Api::ApplicationController
   def show
-    render json: current_user.balance.as_json(only: %i[user_id amount])
+    render json: current_user.balance.as_json(only: :amount)
   end
 end

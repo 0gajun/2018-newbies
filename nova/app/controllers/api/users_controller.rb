@@ -2,7 +2,7 @@
 
 class Api::UsersController < Api::ApplicationController
   def show
-    render json: current_user
+    render json: current_user.as_json(only: %i[nickname email])
   end
 
   def update
