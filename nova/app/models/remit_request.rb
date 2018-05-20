@@ -12,6 +12,8 @@ class RemitRequest < ApplicationRecord
 
   validate :requested_user_should_be_different
 
+  after_create :publish_requested_event
+
   def accept!
     RemitService.execute!(self)
   end
@@ -46,5 +48,10 @@ class RemitRequest < ApplicationRecord
     return if user != requested_user
 
     errors.add(:user, 'Cannot request a remit to yourself')
+  end
+
+  def publish_requested_event
+    msg = self.to_json(only: [:id, :user_id, :requested_user_id, :amount])
+    Redis.current.publish("user.#{requested_user.id}.received_remit_request", msg)
   end
 end

@@ -1,5 +1,15 @@
 version: '2'
 services:
+  nginx:
+    build:
+      context: ./cookbooks
+      dockerfile: $PWD/Dockerfile.nginx
+    ports:
+      - "8080:80"
+    depends_on:
+      - nova
+      - pulsar
+    command: [nginx-debug, '-g', 'daemon off;']
   db:
     image: mysql:5.7
     volumes:
@@ -8,7 +18,11 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
     ports:
       - "3307:3306"
-  rails:
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+  nova:
     build: .
     command: bundle exec rails s -p 3000 -b '0.0.0.0'
     tty: true
@@ -19,5 +33,17 @@ services:
       - "3000:3000"
     environment:
       DATABASE_HOST: "db"
+      REDIS_HOST: "redis"
     depends_on:
       - db
+  pulsar:
+    build:
+      context: ../pulsar
+    command: /app/pulsar
+    ports:
+      - "3001:3001"
+    environment:
+      PULSAR_BIND_ADDR: "0.0.0.0:3001"
+      REDIS_ADDR: "redis:6379"
+    depends_on:
+      - redis

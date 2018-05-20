@@ -129,6 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
       isCharging: false,
       target: "",
       user: {
+        id: 0,
         email: "",
         nickname: "",
       },
@@ -142,6 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
       var self = this;
       api.get('/api/user').then(function(json) {
         self.user = json;
+        self.setUpReceivedRemitRequestsStream(self.user.id);
       });
 
       api.get('/api/charges').then(function(json) {
@@ -156,17 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
         self.amount = json.amount
       })
 
-      api.get('/api/remit_requests', { status: 'outstanding' }).
-        then(function(json) {
-          self.recvRemits = json;
-        });
-
-      setInterval(function() {
-        api.get('/api/remit_requests', { status: 'outstanding' }).
-          then(function(json) {
-            self.recvRemits = json;
-          });
-      }, 5000);
+      this.refreshRemitRequests();
     },
     mounted: function() {
       var form = document.getElementById('credit-card');
@@ -314,6 +306,21 @@ document.addEventListener('DOMContentLoaded', function() {
       //      self.user = json;
       //    });
       },
+      refreshRemitRequests: function() {
+        var self = this;
+        api.get('/api/remit_requests', { status: 'outstanding' }).
+          then(function(json) {
+            self.recvRemits = json;
+          });
+      },
+      setUpReceivedRemitRequestsStream: function(user_id) {
+        let es = new EventSource('/sse/user/' + user_id + '/received_remit_requests');
+
+        var self = this;
+        es.addEventListener('message', event => {
+          self.refreshRemitRequests();
+        });
+      }
     }
   });
 });

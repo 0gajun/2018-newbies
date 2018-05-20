@@ -368,6 +368,7 @@ DEPENDENCIES
   rails (~> 5.2.0)
   rails-controller-testing
   rails-i18n
+  redis
   redis-namespace
   rollbar
   rspec-rails
